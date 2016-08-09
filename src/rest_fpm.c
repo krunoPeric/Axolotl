@@ -36,7 +36,7 @@
 			P = NULL;\
 		}
 
-#define DATABASE_URL "https://script.google.com/macros/s/ABC123/exec"
+#define DATABASE_URL "https://script.google.com/macros/s/AKfycbwh53E9u-ADQyE996zc0x6PlmLvnEmssMSO7pAGpqCPhPbI0Fk/exec"
 
 //
 // @explode: splits a URI into @tokens -- delimited by '/', '\0'
@@ -153,6 +153,7 @@ main(int argc, char *argv[])
 
 	char *result;
 	char *request_uri;
+	char *api_query;
 	struct query_parser request;
 	
 	while (FCGI_Accept() >= 0)
@@ -177,11 +178,14 @@ main(int argc, char *argv[])
 			continue;
 		}
 	
-		result = build_api_query(request, request_uri);
-		result = serialize("api_call", result);
+		api_query = build_api_query(request, request_uri);
+		result = serialize("api_call", api_query);
 
 		print_s(result);
 
+		destroy(request.tokens);
+		destroy(api_query);
+		destroy(result);
 	}
 
 	return exit_status;
