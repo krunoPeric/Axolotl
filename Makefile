@@ -8,7 +8,7 @@ SRC         = src/secio.c src/serialize.c src/rest_fpm.c
 OBJ         = $(SRC:.c=.o)
 CFLAGS      = -std=gnu11 -c -O3 -Wall -pedantic
 CFLAGS     += -Iinclude
-DFLAGS      = -std=gnu11 -c -C -g -dDEBUG -Wall -pedantic
+DFLAGS      = -std=gnu11 -c -C -g -D DEBUG -Wall -pedantic
 DFLAGS     += -Iinclude
 LDFLAGS     = -lfcgi -lcurl
 
@@ -22,7 +22,7 @@ $(BIN): $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
 $(OBJ): $(SRC)
-	$(CC) $(CFLAGS) $(*D)/$(*F).c -o $@
+	$(CC) $(DFLAGS) $(*D)/$(*F).c -o $@
 
 clean:
 	rm -f -v $(OBJ) $(BIN)
