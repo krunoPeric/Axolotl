@@ -1,26 +1,26 @@
-//
-// Harlan James <root@aboyandhisgnu.org> <osurobotics.club>
-//
-// This file is part of Axolotl.
-//
-// Axolotl is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Axolotl is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Axolotl.  If not, see <http://www.gnu.org/licenses/>.
-//
-
+/**
+ * Harlan James <root@aboyandhisgnu.org> <osurobotics.club>
+ *
+ * This file is part of Axolotl.
+ *
+ * Axolotl is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Axolotl is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Axolotl.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "rest_fpm.h"
 
-#include "serialize.h"
+#include "global.h"
 #include "secio.h"
+#include "serialize.h"
 
 #include <fcgi_stdio.h>
 #include <curl/curl.h>
@@ -30,25 +30,22 @@
 #include <string.h>
 #include <unistd.h>
 
-#define destroy(P)\
-		{\
-			free(P);\
-			P = NULL;\
-		}
+#define USE_DEMO_WRAPPER
 
-#define DATABASE_URL "https://script.google.com/macros/s/AKfycbwh53E9u-ADQyE996zc0x6PlmLvnEmssMSO7pAGpqCPhPbI0Fk/exec"
+/**
+ * DATABASE_URL - Base URL for database wrapper
+ */
+#ifdef USE_DEMO_WRAPPER
+	const char * const DATABASE_URL = "https://script.google.com/macros/s/AKfycbwh53E9u-ADQyE996zc0x6PlmLvnEmssMSO7pAGpqCPhPbI0Fk/exec";
+#endif
 
-//
-// @explode: splits a URI into @tokens -- delimited by '/', '\0'
-//
-// @query: the URI passed to FCGI. Must NOT be modified
-//
-// @returns: @query_parser
-//
-
+/**
+ * explode - splits a URI into @tokens -- delimited by '/' and '0'.
+ *
+ * @query: the URI passed to FCGI. Must NOT be modified
+ */
 __attribute__((const, nonnull))
-struct query_parser
-explode(const char * const query)
+struct query_parser explode(const char * const query)
 {
 	struct query_parser result = {0};
 	size_t seek_state;
@@ -106,9 +103,14 @@ explode(const char * const query)
 	return result;
 }
 
+/**
+ * build_api_query - generates the URI used to query the database wrapper
+ *
+ * @parser: pre-filled @query_parser for the source @query
+ * @query: source
+ */
 __attribute__((const, nonnull))
-char *
-build_api_query(struct query_parser parser, const char * const query)
+char * build_api_query(struct query_parser parser, const char * const uri)
 {
 	char *result;
 	char r;
@@ -116,10 +118,10 @@ build_api_query(struct query_parser parser, const char * const query)
 	size_t i, t;
 	size_t offs;
 
-	if (query == NULL)
+	if (uri == NULL)
 		return NULL;
 
-	len = strlen(query);
+	len = strlen(uri);
 	if (len <= 1 || parser.count < 1)
 		return NULL;
 
@@ -128,7 +130,7 @@ build_api_query(struct query_parser parser, const char * const query)
 
 	result = malloc((len+1)*sizeof(char));
 	strcpy(result, DATABASE_URL);
-	strcat(result, query);
+	strcat(result, uri);
 
 	result[offs] = '?';
 
@@ -146,8 +148,7 @@ build_api_query(struct query_parser parser, const char * const query)
 	return result;
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	int exit_status = EXIT_SUCCESS;
 
@@ -155,7 +156,7 @@ main(int argc, char *argv[])
 	char *request_uri;
 	char *api_query;
 	struct query_parser request;
-	
+
 	while (FCGI_Accept() >= 0)
 	{
 		printf("Status: 200\r\n");
