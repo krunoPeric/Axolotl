@@ -27,7 +27,6 @@
 #endif
 
 #include <fcgi_stdio.h>
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,7 +111,7 @@ struct query_parser explode(const char * const query)
  * build_api_query - generates the URI used to query the database wrapper
  *
  * @parser: pre-filled @query_parser for the source @query
- * @query: source
+ * @query: source uri
  */
 __attribute__((nonnull))
 char * build_api_query(struct query_parser parser, const char * const uri)
@@ -173,7 +172,6 @@ void int_handler(int signo)
 }
 
 static time_t raw_time;
-
 void init_or_die()
 {
 	raw_time = time(NULL);
@@ -230,8 +228,10 @@ int main(int argc, char *argv[])
 
 	while (FCGI_Accept() >= 0)
 	{
+		// Log client connection
 		(void) on_accept();
 
+		// TODO Defer writing status until status is known, e.g., 400, etc.
 		printf("Status: 200\r\n");
 		printf("Content-type: application/json\r\n");
 		printf("\r\n");
@@ -241,6 +241,8 @@ int main(int argc, char *argv[])
 		{
 			result = serialize("error", "could not get environment");
 			printf(result);
+			destroy(result);
+
 			continue;
 		}
 		
@@ -249,17 +251,41 @@ int main(int argc, char *argv[])
 		{
 			result = serialize("error", "invalid request uri");
 			printf(result);
+			destroy(result);
+
 			continue;
 		}
-	
+
+		// Generate a request to the demo database wrapper. In the future this
+		// will be moved to a locally cached NoSQL database.
 		api_query = build_api_query(request, request_uri);
-		result = serialize("api_call", api_query);
-		print_s(result);
-		destroy(result);
+		if (api_query == NULL)
+		{
+			result = serialize("error", "could not build request");
+			print_s(result);
+			destroy(result);
 
+			continue;
+		}
+
+		// Query the database
 		result = rcurl_fetch(api_query);
+		if (result == NULL)
+		{
+			result = serialize("error", "could not connect to database :(");
+			print_s(result);
+			destroy(result);
+
+			continue;
+		}
+
+		// Safely print the result
+		// TODO: Add this to every method which writes to a device or remove it
+		//       entirely. In the same vein -- malloc() should probably be moved
+		//       to use calloc() instead.
 		print_s(result);
 
+		// End of client session
 		destroy(request.tokens);
 		destroy(api_query);
 		destroy(result);

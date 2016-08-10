@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Axolotl.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "rcurl.h"
 
 #include "global.h"
@@ -29,6 +30,9 @@
 #define CURL_FAILURE 0
 #define CURL_SUCCESS 1
 
+/**
+ * rcurl_fetch_bus - used during curl write callback to store data
+ */
 struct rcurl_fetch_bus
 {
 	char *payload;
@@ -38,7 +42,12 @@ struct rcurl_fetch_bus
 static CURL *handle;
 static struct curl_slist *headers;
 
-size_t _callback(void *chunk, size_t size, size_t nmemb, void *umemp)
+/**
+ * _callback - continuously writes incoming cURL data
+ *
+ * see: https://curl.haxx.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
+ */
+size_t _callback(char *chunk, size_t size, size_t nmemb, void *umemp)
 {
 	size_t sizeb = size * nmemb;
 	struct rcurl_fetch_bus *bus = (struct rcurl_fetch_bus *) umemp;
@@ -62,8 +71,17 @@ size_t _callback(void *chunk, size_t size, size_t nmemb, void *umemp)
 	return sizeb;
 }
 
+/**
+ * rcurl_init - Initializes a handle for cURL and sets some of the headers
+ * for it.
+ *
+ * @returns: 0 on failure, 1 on success
+ *
+ * @notes: The program cannot function without cURL at this time.
+ */
 int rcurl_init()
 {
+	// Initialize cURL handle
 	if (handle == NULL)
 	{
 		handle = curl_easy_init();
@@ -90,6 +108,9 @@ int rcurl_init()
 	return CURL_SUCCESS;
 }
 
+/**
+ * rcurl_destroy - Cleans up cURL resources and sets them to NULL
+ */
 void rcurl_destroy()
 {
 	curl_easy_cleanup(handle);
@@ -98,6 +119,11 @@ void rcurl_destroy()
 	headers = NULL;
 }
 
+/**
+ * rcurl_fetch - Attempts to fetch the @url provided
+ *
+ * @returns: NULL on failure
+ */
 char *rcurl_fetch(const char * const url)
 {
 	CURLcode rcode;
