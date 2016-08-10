@@ -4,9 +4,9 @@ all: devel
 
 CC          = gcc
 BIN         = rest-fpm.fcgi
-SRC         = src/secio.c src/serialize.c src/rest_fpm.c
+SRC         = src/termio.c src/secio.c src/serialize.c src/rcurl.c src/rest_fpm.c
 OBJ         = $(SRC:.c=.o)
-CFLAGS      = -std=gnu11 -c -O3 -Wall -pedantic
+CFLAGS      = -std=gnu11 -c -Wall -pedantic
 CFLAGS     += -Iinclude
 DFLAGS      = -std=gnu11 -c -C -g -D DEBUG -Wall -pedantic
 DFLAGS     += -Iinclude

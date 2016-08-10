@@ -20,11 +20,13 @@
 #ifndef _REST_FPM_H_
 #define _REST_FPM_H_
 
+#include <stddef.h>
+
 #ifndef __GNUC__
 	#error "Certain GNU extensions are required for this program to function"
 #endif
 
-#include <stddef.h>
+#define VERSION "0"
 
 #define MAX_FCGI_PARAMS 17
 
@@ -43,7 +45,7 @@ const char * const FCGI_PARAMS[MAX_FCGI_PARAMS] =
 	"REQUEST_METHOD",
 	"CONTENT_TYPE",
 	"CONTENT_LENGTH",
-	"SCRPIE_FILENAME",
+	"SCRIPT_FILENAME",
 	"SCRIPT_NAME",
 	"REQUEST_URI",
 	"DOCUMENT_URI",

@@ -19,15 +19,20 @@
 #include "rest_fpm.h"
 
 #include "global.h"
+#include "rcurl.h"
 #include "secio.h"
 #include "serialize.h"
+#ifndef HEADLESS
+	#include "termio.h"
+#endif
 
 #include <fcgi_stdio.h>
-#include <curl/curl.h>
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #define USE_DEMO_WRAPPER
@@ -44,7 +49,7 @@
  *
  * @query: the URI passed to FCGI. Must NOT be modified
  */
-__attribute__((const, nonnull))
+__attribute__((nonnull))
 struct query_parser explode(const char * const query)
 {
 	struct query_parser result = {0};
@@ -109,7 +114,7 @@ struct query_parser explode(const char * const query)
  * @parser: pre-filled @query_parser for the source @query
  * @query: source
  */
-__attribute__((const, nonnull))
+__attribute__((nonnull))
 char * build_api_query(struct query_parser parser, const char * const uri)
 {
 	char *result;
@@ -148,6 +153,68 @@ char * build_api_query(struct query_parser parser, const char * const uri)
 	return result;
 }
 
+__attribute__((noreturn))
+void die()
+{
+	exit(EXIT_FAILURE);
+}
+
+void int_handler(int signo)
+{
+	if (signo != SIGINT)
+	{
+		return;
+	}
+
+	tprintfb("Caught SIGINT", "Exiting gracefully");
+
+	rcurl_destroy();
+	die();
+}
+
+static time_t raw_time;
+
+void init_or_die()
+{
+	raw_time = time(NULL);
+
+	// Initialize cURL
+	if (rcurl_init() == 0)
+	{
+		die();
+	}
+
+	// Gracefully exit on interrupt
+	if (signal(SIGINT, int_handler) == SIG_ERR)
+	{
+		die();
+	}
+}
+
+/**
+ * on_accept - logs and prints information when a client connects
+ */
+int on_accept() {
+	int success = 1;
+
+	struct tm tm = *localtime(&raw_time);
+
+	// Print request information to terminal
+	#ifndef HEADLESS
+		_tprintfb(getenv("REQUEST_METHOD"), getenv("REMOTE_ADDR"));
+		tprintf(" %d-%d-%d+%d:%d:%d\n",
+			tm.tm_year + 1900,
+			tm.tm_mon + 1,
+			tm.tm_mday,
+			tm.tm_hour,
+			tm.tm_min,
+			tm.tm_sec);
+		tprintfb("Request", getenv("REQUEST_URI"));
+	#endif
+
+	return success;
+}
+
 int main(int argc, char *argv[])
 {
 	int exit_status = EXIT_SUCCESS;
@@ -157,8 +224,14 @@ int main(int argc, char *argv[])
 	char *api_query;
 	struct query_parser request;
 
+	tprintf("Starting Axolotl %s compiled on %s %s\n", VERSION,  __DATE__, __TIME__);
+
+	init_or_die();
+
 	while (FCGI_Accept() >= 0)
 	{
+		(void) on_accept();
+
 		printf("Status: 200\r\n");
 		printf("Content-type: application/json\r\n");
 		printf("\r\n");
@@ -188,6 +261,9 @@ int main(int argc, char *argv[])
 		destroy(api_query);
 		destroy(result);
 	}
+
+	// Free cURL memory
+	rcurl_destroy();
 
 	return exit_status;
 }
