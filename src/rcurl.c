@@ -98,7 +98,7 @@ int rcurl_init()
 	// Set cURL options
 	curl_easy_setopt(handle, CURLOPT_CUSTOMREQUEST, "GET");
 	curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
-	curl_easy_setopt(handle, CURLOPT_USERAGENT, "axolotol-agent/1.0");
+	curl_easy_setopt(handle, CURLOPT_USERAGENT, "axolotl-agent/1.0");
 	curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt(handle, CURLOPT_TIMEOUT, 5);
 
