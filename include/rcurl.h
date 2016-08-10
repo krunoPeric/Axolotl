@@ -21,4 +21,6 @@
 
 int rcurl_init();
 void rcurl_destroy();
+char *rcurl_fetch(const char * const url);
+
 #endif // _RCURL_H_

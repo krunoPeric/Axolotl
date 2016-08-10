@@ -17,8 +17,10 @@
 # along with Axolotl.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Default Target
 all: devel
 
+# Compiling
 CC = gcc
 
 CFLAGS  = -std=gnu11 -Wall -pedantic
@@ -26,10 +28,12 @@ CFLAGS += -Iinclude
 
 LDFLAGS = -lfcgi -lcurl
 
+# Default Search Locations
 vpath %.c src
 vpath %.h include
 vpath %.a lib
 
+# Files
 SRC  = secio.c serialize.c termio.c
 SRC += rcurl.c
 SRC += rest_fpm.c
@@ -47,17 +51,21 @@ DIR = $(OBJDIR) $(BINDIR)
 # Debugging
 VARGS = --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=no --track-fds=yes
 
+# Release Target
 build: $(DIR) clean $(BINPTH)
 
+# Development Target
 devel: $(DIR) clean $(BINPTH)
 	spawn-fcgi -n -p 8000 -- /usr/bin/valgrind $(VARGS) ./$(BINPTH)
 
+# Compile Sources
 $(BINPTH): $(OBJPTH)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 $(OBJDIR)/%.o: %.c
-	$(CC) -c $(CFLAGS) $(LDFLAGS) $^ -o $@
+	$(CC) -c -g $(CFLAGS) $(LDFLAGS) $^ -o $@
 
+# Create directories required after install
 $(DIR):
 	@for dir in $@; do \
 		if [ ! -d "$$dir" ]; then \

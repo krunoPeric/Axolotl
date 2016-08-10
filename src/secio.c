@@ -27,6 +27,11 @@
 void
 print_s(const char * const buf)
 {
+	if (buf == NULL)
+	{
+		return;
+	}
+
 	int i = 0;
 	while (buf[i] > 0 && buf[i] <= '~')
 	{

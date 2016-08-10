@@ -254,7 +254,10 @@ int main(int argc, char *argv[])
 	
 		api_query = build_api_query(request, request_uri);
 		result = serialize("api_call", api_query);
+		print_s(result);
+		destroy(result);
 
+		result = rcurl_fetch(api_query);
 		print_s(result);
 
 		destroy(request.tokens);
