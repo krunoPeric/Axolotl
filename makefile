@@ -23,7 +23,7 @@ all: devel
 # Compiling
 CC = gcc
 
-CFLAGS  = -std=gnu11 -Wall -pedantic
+CFLAGS  = -std=gnu11 -Wall -pedantic -O3
 CFLAGS += -Iinclude
 
 LDFLAGS = -lfcgi -lcurl
@@ -63,7 +63,7 @@ $(BINPTH): $(OBJPTH)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 $(OBJDIR)/%.o: %.c
-	$(CC) -c -g $(CFLAGS) $(LDFLAGS) $^ -o $@
+	$(CC) -c $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 # Create directories required after install
 $(DIR):

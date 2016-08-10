@@ -83,7 +83,8 @@ struct query_parser explode(const char * const query)
 	while (query[i] != '\0')
 	{
 		if (seek_state == 0)
-		{	// Seek start
+		{
+			// Seek start
 			if (query[i] == '/' &&  query[i+1] != '\0')
 			{
 				result.tokens[t].start = i+1;
@@ -91,7 +92,8 @@ struct query_parser explode(const char * const query)
 			}
 		}
 		else
-		{	// Seek end
+		{
+			// Seek end
 			if (query[i+1] == '/' || query[i+1] == '\0')
 			{
 				result.tokens[t].end = i;
@@ -138,9 +140,12 @@ char * build_api_query(struct query_parser parser, const char * const uri)
 
 	result[offs] = '?';
 
+	// Iterate over keys/values, transforming the result into a valid URI
+	// for the database wrapper.
 	for (i = 1; i < parser.count; i++)
 	{
-		if ((i & 0b0001) == 1)
+		// Check if indice is even or odd
+		if ((i & 0b1) == 1)
 			r = '=';
 		else
 			r = '&';
@@ -152,12 +157,21 @@ char * build_api_query(struct query_parser parser, const char * const uri)
 	return result;
 }
 
+/**
+ * die - Exit the program
+ */
 __attribute__((noreturn))
 void die()
 {
 	exit(EXIT_FAILURE);
 }
 
+/**
+ * int_handler - Catches user interrupt in interactive mode and attemps to end
+ * gracefully.
+ *
+ * TODO: Catch other interrupts, e.g., kill
+ */
 void int_handler(int signo)
 {
 	if (signo != SIGINT)
@@ -171,7 +185,10 @@ void int_handler(int signo)
 	die();
 }
 
-static time_t raw_time;
+/**
+ * init_or_die - Essential initialization procedure
+ */
+static time_t raw_time; // I saw this done within the kernel so it's okay :100:
 void init_or_die()
 {
 	raw_time = time(NULL);
