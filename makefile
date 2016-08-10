@@ -42,12 +42,14 @@ BIN = rest-fpm.fcgi
 BINDIR = bin
 BINPTH = $(addprefix $(BINDIR)/, $(BIN))
 
+DIR = $(OBJDIR) $(BINDIR)
+
 # Debugging
 VARGS = --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --show-reachable=no --track-fds=yes
 
-build: clean $(BINPTH)
+build: $(DIR) clean $(BINPTH)
 
-devel: clean $(BINPTH)
+devel: $(DIR) clean $(BINPTH)
 	spawn-fcgi -n -p 8000 -- /usr/bin/valgrind $(VARGS) ./$(BINPTH)
 
 $(BINPTH): $(OBJPTH)
@@ -55,6 +57,14 @@ $(BINPTH): $(OBJPTH)
 
 $(OBJDIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) $(LDFLAGS) $^ -o $@
+
+$(DIR):
+	@for dir in $@; do \
+		if [ ! -d "$$dir" ]; then \
+			echo "Creating $$dir/"; \
+			mkdir $$dir; \
+		fi \
+	done
 
 clean:
 	rm -f $(OBJPTH)
