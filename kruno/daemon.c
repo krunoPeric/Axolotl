@@ -51,6 +51,12 @@ int main(void)
 	{
 		exit(EXIT_SUCCESS);
 	}
+	
+	/*
+	 * In order to access files cretated by the daemon, we need to unmask them.
+	 */
+	umask(0);
+
 	/*
 	 * It's very important to change the current working directory to something that will
 	 * always be there.  Not all linux distros completely follow the Linux Filesystem
@@ -62,10 +68,6 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	
-	/*
-	 * In order to access files cretated by the daemon, we need to unmask them.
-	 */
-	umask(0);
 
 	/*
 	 * File Descriptors are unneeccssary for daemons because they cannot use the terminal.  We
@@ -92,7 +94,7 @@ int main(void)
 	{
 		/* do some tasks here... */
 		fprintf(stderr, "running daemon stderr...\n");
-		fprintf(stdout_new, "running daemon stdout...\n");
+		fprintf(stdout, "running daemon stdout...\n");
 		sleep(7);	// wait 30 seconds
 	}
 	exit(EXIT_SUCCESS);
