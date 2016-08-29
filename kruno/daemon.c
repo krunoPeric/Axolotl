@@ -73,9 +73,6 @@ int main(void)
 	 * File Descriptors are unneeccssary for daemons because they cannot use the terminal.  We
 	 * close them out because they are redundant and a potential securty hazard.
 	 */
-	//close(STDIN_FILENO);		// (0)
-	//close(STDOUT_FILENO);		// (1)
-	//close(STDERR_FILENO);		// (2)
 	
 	freopen("stderr.txt", "a", fdopen(STDERR_FILENO, "a"));
 	freopen("stdout.txt", "a", fdopen(STDOUT_FILENO, "a"));
