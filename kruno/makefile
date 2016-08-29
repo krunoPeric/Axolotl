@@ -11,3 +11,5 @@ cat:
 	cat errfile.txt
 	cat outfile.txt
 	
+kruno_daemon: daemon.c
+	gcc daemon.c -std=gnu99 -o kruno_daemon.out

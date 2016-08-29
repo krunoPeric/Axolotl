@@ -31,48 +31,49 @@ void exit_fail_with_errno(int errno_in)
  */
 void redirect_oe_streams(const char *indicator_string, va_list ap)
 {
-	#define NUM_FDS 3
-	/* index by values -> [STDIN_FILENO],[STDOUT_FILENO],[STDERR_FILENO] */
-	bool stream_was_redirected[NUM_FDS] = {false, false, false};	
-	if (indicator_string != NULL) {
-
-		/* redirect streams so the calling argument specifications... */
-		for (; *indicator_string != '\0'; indicator_string++) {
-	printf("LINE 42 - for loop...\n");
-			if (*indicator_string == 'e') {
-	printf("LINE 43 - for loop...\n");
-				FILE *stderr_file = freopen(
-					va_arg(ap, const char *), "a", stderr);
-	printf("LINE 46 - for loop...\n");
-
-				if (stderr_file == NULL) {
-					exit_fail_with_errno(errno);
-				}
-				fprintf(stderr, "to error file \n");
-				stream_was_redirected[STDERR_FILENO] = true;
-
-			} else if (*indicator_string == 'o') {
-	printf("LINE 55 - for loop...\n");
-				FILE *stdout_file  = freopen(
-					va_arg(ap, const char *), "a", stdout);
-
-	printf("LINE 59 - for loop...\n");
-				if (stdout_file == NULL) {
-					exit_fail_with_errno(errno);
-				}
-				printf("to output file\n");
-				stream_was_redirected[STDOUT_FILENO] = true;
-			}
-		}
-	}
-
-	/* close the standard I/O streams that have not been redireceted... */
-	for (int i=0; i<NUM_FDS; i++) {
-		if (stream_was_redirected[i] == false) {
-			close(i);
-		}
-	}
-	#undef NUM_FDS
+//	#define NUM_FDS 3
+//	/* index by values -> [STDIN_FILENO],[STDOUT_FILENO],[STDERR_FILENO] */
+//	bool stream_was_redirected[NUM_FDS] = {false, false, false};	
+//	if (indicator_string != NULL) {
+//
+//		/* redirect streams so the calling argument specifications... */
+//		for (; *indicator_string != '\0'; indicator_string++) {
+//	printf("LINE 42 - for loop...\n");
+//			if (*indicator_string == 'e') {
+//	printf("LINE 43 - for loop...\n");
+//				FILE *stderr_file = freopen(
+//					va_arg(ap, const char *), "a", stderr);
+//	printf("LINE 46 - for loop...\n");
+//
+//				if (stderr_file == NULL) {
+//					exit_fail_with_errno(errno);
+//				}
+//				fprintf(stderr, "to error file \n");
+//				stream_was_redirected[STDERR_FILENO] = true;
+//
+//			} else if (*indicator_string == 'o') {
+//	printf("LINE 55 - for loop...\n");
+////				FILE *stdout_file  = freopen(
+////					va_arg(ap, const char *), "a",
+////					fdopen(STDOUT_FILENO, "a"));
+////
+//	printf("LINE 59 - for loop...\n");
+////				if (stdout_file == NULL) {
+////					exit_fail_with_errno(errno);
+////				}
+//				printf("to output file\n");
+//				stream_was_redirected[STDOUT_FILENO] = true;
+//			}
+//		}
+//	}
+//
+//	/* close the standard I/O streams that have not been redireceted... */
+//	for (int i=0; i<NUM_FDS; i++) {
+//		if (stream_was_redirected[i] == false) {
+//			close(i);
+//		}
+//	}
+//	#undef NUM_FDS
 }
 
 void setup_daemon(const char *indicator_string, ...)
@@ -136,7 +137,7 @@ void setup_daemon(const char *indicator_string, ...)
 	 * always be there.  Not all linux distros completely follow the Linux Filesystem
 	 * Hierarchy standard, the ONLY gauranteed directory is root (/).
 	 */
-	if ((chdir("/"))<0)	// chdir() returns -1 on failure...
+	if ((chdir("./"))<0)	// chdir() returns -1 on failure...
 	{
 		/* log any failure here... */
 		exit(EXIT_FAILURE);
@@ -148,22 +149,31 @@ void setup_daemon(const char *indicator_string, ...)
 	va_start(ap, indicator_string);
 	redirect_oe_streams(indicator_string, ap);
 	va_end(ap);
+	printf("LINE 152\n");
 
 	/* 
 	 * NOTE: man close said errors should be checked here even though most prople don't.  I'm
 	 * not checking any because we havent used any of these files...
 	 */
 
+    for (int x = sysconf(_SC_OPEN_MAX); x>0; x--)
+	        {
+			        close (x);
+				    }
 	/* Daemon-specific initializations go here... */
 
 	/*
 	 * the big daemon infinite loop (technically not "infinite")
 	 */
-	exit(EXIT_SUCCESS);
+//	exit(EXIT_SUCCESS);
 }
 
 int main()
 {
 	setup_daemon("eo", "errfile.txt", "outfile.txt");
-	return 0;
+	while(1)
+	{
+		sleep(20);
+	}
+	return EXIT_SUCCESS;
 }
