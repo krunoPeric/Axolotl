@@ -27,11 +27,7 @@ int main(void)
 	{
 		exit(EXIT_SUCCESS);
 	}
-	/*
-	 * it's advisable to keep a log file for debugging at least.  I should figure out how to
-	 * make one...  In order to access files cretated by the daemon, we need to unmask them.
-	 */
-	umask(0);
+	
 	/* Here's the advisable place to open any log files.... */
 
 	/* Creating an SID is very similar to creating a fork */
@@ -65,6 +61,12 @@ int main(void)
 		/* log any failure here... */
 		exit(EXIT_FAILURE);
 	}
+	
+	/*
+	 * In order to access files cretated by the daemon, we need to unmask them.
+	 */
+	umask(0);
+
 	/*
 	 * File Descriptors are unneeccssary for daemons because they cannot use the terminal.  We
 	 * close them out because they are redundant and a potential securty hazard.
@@ -90,7 +92,7 @@ int main(void)
 	{
 		/* do some tasks here... */
 		fprintf(stderr, "running daemon stderr...\n");
-		fprintf(stdout, "running daemon stdout...\n");
+		fprintf(stdout_new, "running daemon stdout...\n");
 		sleep(7);	// wait 30 seconds
 	}
 	exit(EXIT_SUCCESS);
