@@ -73,9 +73,17 @@ int main(void)
 	 * File Descriptors are unneeccssary for daemons because they cannot use the terminal.  We
 	 * close them out because they are redundant and a potential securty hazard.
 	 */
+
+	int stderr_redirect_FD = open("errfile.txt", O_RDWR|O_APPEND|O_CREAT|
+						     S_IWUSR|S_IRUSR|S_IRGRP);
 	
-	freopen("stderr.txt", "a", fdopen(STDERR_FILENO, "a"));
-	freopen("stdout.txt", "a", fdopen(STDOUT_FILENO, "a"));
+	int stdout_redirect_FD = open("outfile.txt", O_RDWR|O_APPEND|O_CREAT|
+						     S_IWUSR|S_IRUSR|
+						     S_IRGRP);
+
+	dup2(stderr_redirect_FD, STDERR_FILENO);
+	dup2(stdout_redirect_FD, STDOUT_FILENO);
+
 
 	/* 
 	 * NOTE: man close said errors should be checked here even though most prople don't.  I'm
@@ -89,9 +97,11 @@ int main(void)
 	 */
 	while (1)
 	{
+	fprintf(stderr, "%d\n", stdout_redirect_FD);
 		/* do some tasks here... */
 		fprintf(stderr, "running daemon stderr...\n");
-		fprintf(stdout, "running daemon stdout...\n");
+		fprintf(stderr,"%d\n",
+			fprintf(stdout, "running daemon stdout...\n"));
 		sleep(7);	// wait 30 seconds
 	}
 	exit(EXIT_SUCCESS);
