@@ -8,8 +8,13 @@
 #include <syslog.h>
 #include <string.h>
 
+#include <signal.h>
+
 int main(void)
 {
+
+
+
 
 	pid_t pid, sid;
 	/* Fork off the parent process */
@@ -27,8 +32,7 @@ int main(void)
 	{
 		exit(EXIT_SUCCESS);
 	}
-	
-	/* Here's the advisable place to open any log files.... */
+
 
 	/* Creating an SID is very similar to creating a fork */
 	sid = setsid();
@@ -37,6 +41,15 @@ int main(void)
 		/* you should log any errors right here... */
 		exit(EXIT_FAILURE);
 	}
+
+	
+//	signal(SIGCHLD, SIG_IGN);
+//	signal(SIGHUP, SIG_IGN);
+
+
+
+
+
 
 	/*
 	 * fork again (per stack overflow, but not per devin...)
@@ -51,7 +64,8 @@ int main(void)
 	{
 		exit(EXIT_SUCCESS);
 	}
-	
+
+			
 	/*
 	 * In order to access files cretated by the daemon, we need to unmask them.
 	 */
@@ -62,27 +76,26 @@ int main(void)
 	 * always be there.  Not all linux distros completely follow the Linux Filesystem
 	 * Hierarchy standard, the ONLY gauranteed directory is root (/).
 	 */
-	if ((chdir("./"))<0)	// chdir() returns -1 on failure...
+	if ((chdir("/git/Project-Warden/Axolotl/kruno"))<0)	// chdir() returns -1 on failure...
 	{
 		/* log any failure here... */
 		exit(EXIT_FAILURE);
 	}
-	
+
 
 	/*
 	 * File Descriptors are unneeccssary for daemons because they cannot use the terminal.  We
 	 * close them out because they are redundant and a potential securty hazard.
 	 */
 
-	int stderr_redirect_FD = open("errfile.txt", O_RDWR|O_APPEND|O_CREAT|
+
+	int warden_log_FD = open("warden.log", O_RDWR|O_APPEND|O_CREAT,
 						     S_IWUSR|S_IRUSR|S_IRGRP);
 	
-	int stdout_redirect_FD = open("outfile.txt", O_RDWR|O_APPEND|O_CREAT|
-						     S_IWUSR|S_IRUSR|
-						     S_IRGRP);
+	dup2(warden_log_FD, STDERR_FILENO);
+	dup2(warden_log_FD, 1);
 
-	dup2(stderr_redirect_FD, STDERR_FILENO);
-	dup2(stdout_redirect_FD, STDOUT_FILENO);
+
 
 
 	/* 
@@ -97,12 +110,10 @@ int main(void)
 	 */
 	while (1)
 	{
-	fprintf(stderr, "%d\n", stdout_redirect_FD);
 		/* do some tasks here... */
 		fprintf(stderr, "running daemon stderr...\n");
-		fprintf(stderr,"%d\n",
-			fprintf(stdout, "running daemon stdout...\n"));
-		sleep(7);	// wait 30 seconds
+		fprintf(stdout, "running daemon stdout...\n");
+		sleep(7);	// wait
 	}
 	exit(EXIT_SUCCESS);
 }
