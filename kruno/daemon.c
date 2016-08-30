@@ -50,11 +50,11 @@ int main(void)
 	umask(0);
 
 
-	close(STDIN_FILENO);close(STDOUT_FILENO);close(STDERR_FILENO);
-	int warden_log = open("warden.log", O_RDWR|O_CREAT|O_APPEND,
-					    S_IRUSR|S_IWUSR|S_IRGRP); 
-	dup2(warden_log, STDOUT_FILENO);
-	dup2(warden_log, STDERR_FILENO);
+	fclose(stdin); fclose(stdout); fclose(stderr);
+
+	freopen("warden.log", "a", stdout);
+
+		
 
 	while(1)
 	{
