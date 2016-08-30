@@ -5,11 +5,7 @@ setup_daemon: setup_daemon.c
 	gcc setup_daemon.c -std=gnu99 -o setup_daemon.out
 
 clean:
-	rm -f *.txt *.out
-
-cat:
-	cat errfile.txt
-	cat outfile.txt
+	rm -f *.txt *.out *.log
 	
 kruno_daemon: daemon.c
 	gcc daemon.c -std=gnu99 -o kruno_daemon.out
