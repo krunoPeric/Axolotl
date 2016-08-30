@@ -62,7 +62,7 @@ int main(void)
 	 * always be there.  Not all linux distros completely follow the Linux Filesystem
 	 * Hierarchy standard, the ONLY gauranteed directory is root (/).
 	 */
-	if ((chdir("./"))<0)	// chdir() returns -1 on failure...
+	if ((chdir("/git/Project-Warden/Axolotl/kruno"))<0)	// chdir() returns -1 on failure...
 	{
 		/* log any failure here... */
 		exit(EXIT_FAILURE);
@@ -74,16 +74,12 @@ int main(void)
 	 * close them out because they are redundant and a potential securty hazard.
 	 */
 
-	int stderr_redirect_FD = open("errfile.txt", O_RDWR|O_APPEND|O_CREAT|
+	int warden_FD = open("warden.log", O_RDWR|O_APPEND|O_CREAT,
 						     S_IWUSR|S_IRUSR|S_IRGRP);
+
+	dup2(warden_FD, STDERR_FILENO);
+	dup2(warden_FD, STDOUT_FILENO);
 	
-	int stdout_redirect_FD = open("outfile.txt", O_RDWR|O_APPEND|O_CREAT|
-						     S_IWUSR|S_IRUSR|
-						     S_IRGRP);
-
-	dup2(stderr_redirect_FD, STDERR_FILENO);
-	dup2(stdout_redirect_FD, STDOUT_FILENO);
-
 
 	/* 
 	 * NOTE: man close said errors should be checked here even though most prople don't.  I'm
@@ -97,11 +93,9 @@ int main(void)
 	 */
 	while (1)
 	{
-	fprintf(stderr, "%d\n", stdout_redirect_FD);
 		/* do some tasks here... */
 		fprintf(stderr, "running daemon stderr...\n");
-		fprintf(stderr,"%d\n",
-			fprintf(stdout, "running daemon stdout...\n"));
+		fprintf(stdout, "running daemon stdout...\n");
 		sleep(7);	// wait 30 seconds
 	}
 	exit(EXIT_SUCCESS);
