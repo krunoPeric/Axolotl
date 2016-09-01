@@ -1,15 +1,11 @@
-file: test.c
-	gcc test.c -std=gnu99
+CC = gcc
 
-setup_daemon: setup_daemon.c
-	gcc setup_daemon.c -std=gnu99 -o setup_daemon.out
+CFLAGS = -std=gnu99 -Wall -pedantic -DDAEMON
 
-clean:
-	rm -f *.txt *.out
+SRCS = main.c src/daemon.c
+HEADERS = headers/daemon.h
 
-cat:
-	cat errfile.txt
-	cat outfile.txt
-	
-kruno_daemon: daemon.c
-	gcc daemon.c -std=gnu99 -o kruno_daemon.out
+PROG = bin/warden_main
+
+$(PROG) : $(SRCS) $(HEADERS)
+	$(CC) $(CFLAGS) $(SRCS) $(HEADERS) -o $(PROG)
