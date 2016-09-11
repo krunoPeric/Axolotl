@@ -4,22 +4,49 @@
 #include <string.h>
 #include <stdlib.h>
 
-void setup_store_curl_handle(CURL *curl_handle, FILE *curl_data_file,
-				FILE *curl_header_file)
+
+size_t write_callback(void *contents, size_t size, size_t nmemb, void *userdata)
+{
+	/* size of data = size*nmemb.  Data passed is not null terminated! */
+	size_t real_size = size*nmemb;
+	struct memory_struct *memory_block = (struct memory_struct *)userdata;
+	memory_block->memory = realloc(memory_block->memory, 
+					memory_block->size + real_size + 1);
+
+	if (memory_block->memory == NULL)
+	{
+		printf("not enough memory (ralloc returned NULL)\n");
+		return 0;
+	}
+
+	/*
+	 * copy the recieved curl data to the memory component of the
+	 * memory_struct pointer passed by userdata...
+	 */
+	memcpy(&(memory_block->memory[memory_block->size]), contents, real_size);
+	/* update the size of the memory chunk... */
+	memory_block->size += real_size;
+	memory_block->memory[memory_block->size] = 0;
+	return real_size;
+}
+
+
+
+void setup_store_curl_handle(CURL *curl_handle, memory_struct *chunk, memory_struct *header_chunk)
 {
 	char *url = "127.0.0.1:1991/places/store/iface/light";
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url); 
-	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA,
-			(void *)curl_data_file); 
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)*chunk); 
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, 
-			(void *)curl_header_file);
+				(void *)*header_chunk);
+	curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, write_callback);
 
 	/* 
 	 * some servers don't like requests that are made without a user-agent
 	 * field.   One is provided just in case...
 	 */
 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-
 	return;
 }
 
@@ -43,19 +70,13 @@ void do_curl(CURL *curl_handle)
 	return;
 }
 
-void do_jsmin(const char *file, const char *file_min)
+void print_chunk(memory_struct *chunk)
 {
-	/*
-	 * TODO:
-	 *	figure out how to do this using file descriptors instaed.  Make
-	 *	a bash script and then run it with system?
-	 *	system using /bin/sh instead of bin/bash...doesn't like using
-	 *	file descriptors...
-	 */
-	const int len = 300;
-	char command[len];
-	for (int i=0; i<len; i++) command[i] = '\0';
-	snprintf(command, len, "jsmin < %s > %s\n", file, file_min);
-	system(command); 
+	/* print the reponse */
+	long size_of_chunk = (long)chunk->size;
+	printf("%lu bytes retrieved\n", size_of_chunk);
+	for (long i=0; i<size_of_chunk; i++)
+	{
+		printf("%c", chunk->memory[i]);
+	}
 }
-

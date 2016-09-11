@@ -25,33 +25,39 @@ int main()
 		curl_global_init(CURL_GLOBAL_ALL);
 		CURL *store_curl_handle;
 		store_curl_handle = curl_easy_init();
-		#define CURL_LOG_PATH "/git/Project-Warden/Axolotl/kruno/"
-		FILE *store_curl_data_file = fopen(
-			CURL_LOG_PATH "store_curl_response.log", "w+");
-		FILE *store_curl_data_file_min = fopen(
-			CURL_LOG_PATH "store_curl_response.min.log", "w+");
-		FILE *store_curl_header_file = fopen(
-			CURL_LOG_PATH "store_curl_headers.log", "w+");
-		setup_store_curl_handle(store_curl_handle,
-					store_curl_data_file, 
-					store_curl_header_file);
+
+		memory_struct *response_chunk = malloc(1);
+		memory_struct *header_chunk = malloc(1);
+		response_chunk->memory = malloc(1);
+		response_chunk->size = 0;
+		header_chunk->memory = malloc(1);
+		header_chunk->size = 0;
+
+		setup_store_curl_handle(store_curl_handle, response_chunk, header_chunk);
 	#endif
 
 	while(1)	
 	{
 		printf("test\n");
 		#ifdef CURLING
-			CLEAR_LOGS
 			do_curl(store_curl_handle);
-			FLUSH_LOGS
-			do_jsmin(CURL_LOG_PATH "store_curl_response.log", 
-				 CURL_LOG_PATH "store_curl_response.min.log");
+
+			print_chunk(header_chunk);
+			print_chunk(response_chunk);
 		#endif
 		sleep(5);
 	}
-	daemon_end(); 
+
+	#ifdef DAEMON
+		daemon_end();	/* close standard file descriptors */
+	#endif
 
 	#ifdef CURLING
+		free(response_chunk->memory);
+		free(header_chunk->memory);
+		free(response_chunk);
+		free(header_chunk);
+
 		curl_easy_cleanup(store_curl_handle);
 		curl_global_cleanup();
 	#endif
