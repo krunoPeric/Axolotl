@@ -1,8 +1,9 @@
 CC = gcc
 
 CFLAGS = -std=gnu99 -Wall -pedantic 
-#CFLAGS += -DDAEMON
-CFLAGS += -DCURLING -lcurl
+CFLAGS += -DDAEMON
+CFLAGS += -DCURLING 
+CFLAGS += -lcurl
 
 SRCS = main.c src/daemon.c src/curl_functions.c
 HEADERS = headers/daemon.h headers/curl_functions.h

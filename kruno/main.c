@@ -26,8 +26,8 @@ int main()
 		CURL *store_curl_handle;
 		store_curl_handle = curl_easy_init();
 
-		memory_struct *response_chunk = malloc(1);
-		memory_struct *header_chunk = malloc(1);
+		memory_struct *response_chunk = malloc(sizeof(memory_struct));
+		memory_struct *header_chunk = malloc(sizeof(memory_struct));
 		response_chunk->memory = malloc(1);
 		response_chunk->size = 0;
 		header_chunk->memory = malloc(1);
@@ -36,14 +36,17 @@ int main()
 		setup_store_curl_handle(store_curl_handle, response_chunk, header_chunk);
 	#endif
 
-	while(1)	
+//	while(1)	
+	for (int i=0; i<5; i++)
 	{
 		printf("test\n");
 		#ifdef CURLING
 			do_curl(store_curl_handle);
 
 			print_chunk(header_chunk);
+			printf("\n\n");
 			print_chunk(response_chunk);
+			printf("\n\n");
 		#endif
 		sleep(5);
 	}
