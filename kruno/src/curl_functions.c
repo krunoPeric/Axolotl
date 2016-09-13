@@ -1,4 +1,4 @@
-#include "../headers/curl_functions.h"
+#include "../include/curl_functions.h"
 #include <stdio.h>
 #include <curl/curl.h>
 #include <string.h>
@@ -35,7 +35,8 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userdata)
 void setup_store_curl_handle(CURL *curl_handle, memory_struct *response_chunk, memory_struct *header_chunk)
 {
 	char *url =
-	"127.0.0.1:1991/places/store/light/since/2011-12-24T12:12:12.100Z";
+	"http://api.osudev.club/places/store/light/since/2011-12-24T12:12:12.100Z";
+//	"127.0.0.1:1991/places/store/light/since/2011-12-24T12:12:12.100Z";
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url); 
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)response_chunk); 
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_callback);

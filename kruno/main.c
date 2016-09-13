@@ -1,10 +1,14 @@
+#ifdef JSMN
+	#include "include/jsmn_functions.h"
+#endif
+
 #ifdef DAEMON
-#include "headers/daemon.h"
+	#include "include/daemon.h"
 #endif
 
 #ifdef CURLING
-#include "headers/curl_functions.h"
-#include <curl/curl.h>
+	#include "include/curl_functions.h"
+	#include <curl/curl.h>
 #endif
 
 
@@ -36,19 +40,30 @@ int main()
 		setup_store_curl_handle(store_curl_handle, response_chunk, header_chunk);
 	#endif
 
+	#ifdef JSMN
+		light_t *light_data;
+	#endif
+
 //	while(1)	
-	for (int i=0; i<5; i++)
+	for (int i=0; i<1; i++)
 	{
 		printf("test\n");
 		#ifdef CURLING
 			do_curl(store_curl_handle);
 
 			print_chunk(header_chunk);
-			printf("\n\n");
 			print_chunk(response_chunk);
-			printf("\n\n");
 		#endif
-		sleep(5);
+
+		#ifdef JSMN
+		printf("test line 59\n");
+			parse_json_to_light_t(response_chunk->memory,
+								light_data);
+			for (int i=0; i<13; i++){ printf(light_data[i].date); printf("test\n");}
+		#endif
+
+
+//		sleep(5);
 	}
 
 	#ifdef DAEMON
