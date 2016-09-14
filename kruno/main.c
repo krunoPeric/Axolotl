@@ -1,15 +1,9 @@
-#ifdef JSMN
-	#include "include/jsmn_functions.h"
-#endif
+#include "include/jsmn_functions.h"
 
-#ifdef DAEMON
-	#include "include/daemon.h"
-#endif
+#include "include/daemon.h"
 
-#ifdef CURLING
-	#include "include/curl_functions.h"
-	#include <curl/curl.h>
-#endif
+#include "include/curl_functions.h"
+#include <curl/curl.h>
 
 
 #include <unistd.h>
@@ -41,7 +35,7 @@ int main()
 	#endif
 
 	#ifdef JSMN
-		light_t *light_data;
+		light_t **light_data = NULL;
 	#endif
 
 //	while(1)	
@@ -56,15 +50,19 @@ int main()
 		#endif
 
 		#ifdef JSMN
-		printf("test line 59\n");
+		printf("\ntest line 59\n");
 			parse_json_to_light_t(response_chunk->memory,
-								light_data);
-			for (int i=0; i<13; i++){ printf(light_data[i].date); printf("test\n");}
+								&light_data);
+	//		for (int i=0; i<13; i++){ printf(light_data[i].date); printf("test\n");}
 		#endif
 
 
 //		sleep(5);
 	}
+
+	printf("size of %lu\n", sizeof(light_data[0]->date));
+	printf("date 0: %s\n", light_data[0]->date);
+	for (int i=0; i<13; i++) {printf("date[%i] = %s\n", i, light_data[i]->date);}
 
 	#ifdef DAEMON
 		daemon_end();	/* close standard file descriptors */

@@ -16,16 +16,29 @@ int token_equals(const char *json, jsmntok_t *token,
 	 * to comparison_string
 	 */
 	if (  token->type == JSMN_STRING &&
-	      (int) strlen(comparison_string) == token_length &&
-	      strncmp(json + token->start, comparison_string, token_length)  )
+	      (int)strlen(comparison_string) == token_length &&
+	      strncmp(json + token->start, comparison_string, token_length) == 0  )
 	{
 		return 0;
 	}
 	return -1;
 }
 
-int parse_json_to_light_t(const char *json, light_t *light_data_set)
+void print_token(const char *json, jsmntok_t *token, int token_index)
 {
+	printf("token #%i: , token.start = %i, token.end = %i  ", token_index,
+							token->start, token->end);
+
+	printf("%.*s  ", token->end - token->start, json + token->start);
+
+	printf("\n");
+
+
+}
+
+int parse_json_to_light_t(const char *json, light_t ***light_data_set)
+{
+	int num_elems;
 	printf("test\n");
 	jsmn_parser parser;
 	jsmn_init(&parser);
@@ -51,16 +64,26 @@ int parse_json_to_light_t(const char *json, light_t *light_data_set)
 	}
 	printf("test 51 jsmn\n");
 	/* process jsmn parse results... */
+
+
+
+	
 	for (int i=0; i<parse_result; i++) {
+		printf("i = %i ", i);
+		printf("\033[32m");
+		print_token(json, &tokens[i], i);
+		printf("\033[31m");
 		if (token_equals(json, &tokens[i], "error") == 0) {
-			if (json[tokens[i+1].start] == 't')
-				;				/* TODO? */
+			if (json[tokens[i+1].start] == 'f')
+				printf("error = false\n");
+								/* TODO? */
 			else
-				;				/* TODO? */
+				printf("error = true\n");
+								/* TODO? */
 			i++;
-			printf("test61\n");
 		}
 		else if (token_equals(json, &tokens[i], "payload") == 0) {
+			printf("payload\n");
 			i++;
 			if (tokens[i].type == JSMN_OBJECT)
 			{
@@ -69,16 +92,32 @@ int parse_json_to_light_t(const char *json, light_t *light_data_set)
 				{
 					i++;	/* move on to "dates" (expected...) */
 					if (token_equals(json, &tokens[i], "dates") == 0) {
+						printf("dates\n");
 						i++;	/* move on to array of dates (expected...) */	
 						if (tokens[i].type == JSMN_ARRAY)
 						{
+							printf("jsmn_array\n");
 							/* allocate memory for the array of structs... */
-							int num_elems = tokens[i].size;
-							light_data_set = malloc(sizeof(light_t) * num_elems);	
+							num_elems = tokens[i].size;
+							printf("number of dates = %i\n", num_elems);
+							printf("alloc array...\n");
+							*light_data_set =
+								malloc(sizeof(light_t *) * num_elems);	
 							i++;	/* move on to first date (expected...) */
-							for (int k=0; i < (i+num_elems-1); i++, k++) {
-								int size_of_date_string = tokens[i].end - tokens[i].start;	
-								light_data_set[k].date = malloc(size_of_date_string);
+#define skip
+#ifndef skip
+#endif
+							for (int k=0; k < num_elems; k++) {
+								printf("i = %i, alloc struct element...\n", i);
+								(*light_data_set)[k] = malloc(sizeof(light_t));
+								(*light_data_set)[k]->date = malloc(sizeof(char) * 11);
+								strncpy((*light_data_set)[k]->date, json+tokens[i].start, 11);
+								(*light_data_set)[k]->date[10] = '\0';
+								printf("\033[33mdate[%i] = %s\n", k, (*light_data_set)[k]->date);
+								printf("\033[32m");
+								print_token(json, &tokens[i], i);
+								printf("\033[31m");
+								i++;
 							}
 						}
 					}
@@ -86,5 +125,6 @@ int parse_json_to_light_t(const char *json, light_t *light_data_set)
 			}
 		}
 	}
+	printf("\033[0m");
 	return 0;
 }

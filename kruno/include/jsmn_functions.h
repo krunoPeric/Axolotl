@@ -20,6 +20,6 @@ typedef struct light_t
 int token_equals(const char *json, jsmntok_t *token, 
 					const char *comparison_string);
 
-int parse_json_to_light_t(const char *json, light_t *light_data);
+int parse_json_to_light_t(const char *json, light_t ***light_data);
 
 #endif
