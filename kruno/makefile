@@ -1,7 +1,7 @@
 CC = gcc
 
 CFLAGS = -std=gnu99 -Wall -pedantic 
-#CFLAGS += -DDAEMON
+CFLAGS += -DDAEMON
 CFLAGS += -DCURLING 
 CFLAGS += -lcurl
 CFLAGS += -DJSMN

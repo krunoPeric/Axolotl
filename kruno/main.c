@@ -40,10 +40,11 @@ int main()
 		 * GET response 
 		 */
 		light_t **light_data = NULL;
+		int num_states = 0;
 	#endif
 
 //	while(1)	
-	for (int i=0; i<20; i++)
+	for (int i=0; i<3; i++)
 	{
 			light_data = NULL;
 		#ifdef CURLING
@@ -54,17 +55,23 @@ int main()
 		#endif
 
 		#ifdef JSMN
-			parse_json_to_light_t(response_chunk->memory,
+			num_states = parse_json_to_light_t(response_chunk->memory,
 								&light_data);
 
 			/* print the array of light_t structs... */
-			for (int i=0; i<13; i++) 
-				printf("date[%i] = %s, state[%i] = %i\n", i, light_data[i]->date, i, light_data[i]->state);
+			printf("\nThe array of light_t structs parsed from json:\n");
+			for (int i=0; i<num_states; i++) 
+				printf("light_t_data[%i]: date = %s, state = %i\n", i, light_data[i]->date, light_data[i]->state);
+
+			/* free the array of light_t for next call... */
+			for (int i=0; i<num_states; i++) free(light_data[i]->date);
+			for (int i=0; i<num_states; i++) free(light_data[i]);
+			free(light_data);
 
 		#endif
 
 
-	//	sleep(5);
+		sleep(5);
 	}
 
 
@@ -82,11 +89,6 @@ int main()
 		curl_global_cleanup();
 	#endif
 
-	#ifdef JSMN
-		for (int i=0; i<13; i++) free(light_data[i]->date);
-		for (int i=0; i<13; i++) free(light_data[i]);
-		free(light_data);
-	#endif
 
 	return 0;
 }

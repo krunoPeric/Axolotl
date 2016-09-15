@@ -107,5 +107,5 @@ int parse_json_to_light_t(const char *json, light_t ***light_data_set)
 			}
 		}
 	}
-	return 0;
+	return num_elems;
 }
