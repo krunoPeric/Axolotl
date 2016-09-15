@@ -32,7 +32,8 @@ size_t write_callback(void *contents, size_t size, size_t nmemb, void *userdata)
 
 
 
-void setup_store_curl_handle(CURL *curl_handle, memory_struct *response_chunk, memory_struct *header_chunk)
+void setup_store_curl_handle(CURL *curl_handle, memory_struct *response_chunk, 
+						memory_struct *header_chunk)
 {
 	char *url =
 	"http://api.osudev.club/places/store/light/since/2011-12-24T12:12:12.100Z";
@@ -52,8 +53,16 @@ void setup_store_curl_handle(CURL *curl_handle, memory_struct *response_chunk, m
 	return;
 }
 
-void do_curl(CURL *curl_handle)
+void do_curl(CURL *curl_handle, memory_struct *response_chunk, 
+						memory_struct *header_chunk)
 {
+//#define skip
+#ifndef skip
+	response_chunk->memory = realloc(response_chunk->memory, 1);
+	response_chunk->size = 0;
+	header_chunk->memory = realloc(header_chunk->memory, 1);
+	header_chunk->size = 0;
+#endif
 	CURLcode res;
 	/* get the response... */
 	res = curl_easy_perform(curl_handle);
@@ -81,4 +90,5 @@ void print_chunk(memory_struct *chunk)
 	{
 		printf("%c", chunk->memory[i]);
 	}
+	printf("\n");
 }

@@ -16,7 +16,8 @@ size_t write_callback(void *contents, size_t size,
 				size_t nmemb, void *userdata);
 void setup_store_curl_handle(CURL *curl_handle, memory_struct *chunk, 
 					memory_struct *header_chunk);
-void do_curl(CURL *curl_handle);
+void do_curl(CURL *curl_handle, memory_struct *chunk, 
+					memory_struct *header_chunk);
 void print_chunk(memory_struct *chunk);
 
 #endif

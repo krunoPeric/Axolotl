@@ -15,8 +15,8 @@
 int main()
 {
 	#ifdef DAEMON
-		daemon_mk(NULL, "/var/log/warden.log",
-		"/var/log/warden.err.log");				
+		daemon_mk(NULL, "/var/log/warden.log", 
+						"/var/log/warden.err.log");
 	#endif
 
 	#ifdef CURLING
@@ -35,34 +35,38 @@ int main()
 	#endif
 
 	#ifdef JSMN
+		/* 
+		 * for array of light_t structs generated from parsing the store
+		 * GET response 
+		 */
 		light_t **light_data = NULL;
 	#endif
 
 //	while(1)	
-	for (int i=0; i<1; i++)
+	for (int i=0; i<20; i++)
 	{
-		printf("test\n");
+			light_data = NULL;
 		#ifdef CURLING
-			do_curl(store_curl_handle);
+			do_curl(store_curl_handle, response_chunk, header_chunk);
 
 			print_chunk(header_chunk);
 			print_chunk(response_chunk);
 		#endif
 
 		#ifdef JSMN
-		printf("\ntest line 59\n");
 			parse_json_to_light_t(response_chunk->memory,
 								&light_data);
-	//		for (int i=0; i<13; i++){ printf(light_data[i].date); printf("test\n");}
+
+			/* print the array of light_t structs... */
+			for (int i=0; i<13; i++) 
+				printf("date[%i] = %s, state[%i] = %i\n", i, light_data[i]->date, i, light_data[i]->state);
+
 		#endif
 
 
-//		sleep(5);
+	//	sleep(5);
 	}
 
-	printf("size of %lu\n", sizeof(light_data[0]->date));
-	printf("date 0: %s\n", light_data[0]->date);
-	for (int i=0; i<13; i++) {printf("date[%i] = %s\n", i, light_data[i]->date);}
 
 	#ifdef DAEMON
 		daemon_end();	/* close standard file descriptors */
@@ -77,5 +81,12 @@ int main()
 		curl_easy_cleanup(store_curl_handle);
 		curl_global_cleanup();
 	#endif
+
+	#ifdef JSMN
+		for (int i=0; i<13; i++) free(light_data[i]->date);
+		for (int i=0; i<13; i++) free(light_data[i]);
+		free(light_data);
+	#endif
+
 	return 0;
 }

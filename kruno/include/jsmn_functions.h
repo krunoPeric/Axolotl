@@ -13,7 +13,7 @@
 typedef struct light_t
 {
 	char *date;
-	int *state;
+	int state;
 } light_t;
 
 
