@@ -56,13 +56,10 @@ void setup_store_curl_handle(CURL *curl_handle, memory_struct *response_chunk,
 void do_curl(CURL *curl_handle, memory_struct *response_chunk, 
 						memory_struct *header_chunk)
 {
-//#define skip
-#ifndef skip
 	response_chunk->memory = realloc(response_chunk->memory, 1);
 	response_chunk->size = 0;
 	header_chunk->memory = realloc(header_chunk->memory, 1);
 	header_chunk->size = 0;
-#endif
 	CURLcode res;
 	/* get the response... */
 	res = curl_easy_perform(curl_handle);

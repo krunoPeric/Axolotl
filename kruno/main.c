@@ -43,10 +43,9 @@ int main()
 		int num_states = 0;
 	#endif
 
-//	while(1)	
-	for (int i=0; i<3; i++)
+	while(1)	
 	{
-			light_data = NULL;
+		light_data = NULL;
 		#ifdef CURLING
 			do_curl(store_curl_handle, response_chunk, header_chunk);
 
@@ -71,7 +70,7 @@ int main()
 		#endif
 
 
-		sleep(5);
+		sleep(60);
 	}
 
 
